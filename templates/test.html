@@ -97,6 +97,39 @@
 {% block scripts %}
 <script>
   document.addEventListener("DOMContentLoaded", function () {
+
+        // Disable right-click
+        document.addEventListener("contextmenu", function (e) {
+      e.preventDefault();
+    });
+
+    // Disable copy, cut, and paste
+    document.addEventListener("copy", function (e) {
+      e.preventDefault();
+    });
+
+    document.addEventListener("cut", function (e) {
+      e.preventDefault();
+    });
+
+    document.addEventListener("paste", function (e) {
+      e.preventDefault();
+    });
+
+    // Disable key combinations for copying
+    document.addEventListener("keydown", function (e) {
+      if (
+        (e.ctrlKey && (e.key === "c" || e.key === "x" || e.key === "v" || e.key === "u")) || // Ctrl + C, X, V, U
+        (e.metaKey && (e.key === "c" || e.key === "x" || e.key === "v" || e.key === "u")) || // Cmd (Mac) + C, X, V, U
+        (e.ctrlKey && e.shiftKey && e.key === "I") || // Ctrl + Shift + I (Inspect Element)
+        (e.ctrlKey && e.shiftKey && e.key === "J") || // Ctrl + Shift + J (Console)
+        (e.ctrlKey && e.key === "S") || // Ctrl + S (Save As)
+        (e.ctrlKey && e.key === "P") // Ctrl + P (Print)
+      ) {
+        e.preventDefault();
+      }
+    });
+
     // Tab switch tracking
     let tabSwitchCount = 0;
     const maxTabSwitches = 3;
