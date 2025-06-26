@@ -119,38 +119,6 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-      // Tab visibility detection
-      let hiddenTime = 0;
-      let warningCount = 0;
-
-      document.addEventListener("visibilitychange", function () {
-        if (document.hidden) {
-          hiddenTime = Date.now();
-        } else {
-          // Only check if tab was hidden for more than 1 second (to avoid false positives)
-          if (hiddenTime > 0 && Date.now() - hiddenTime > 1000) {
-            warningCount++;
-
-            // Show warning
-            const warning = document.getElementById("tabWarning");
-            warning.style.display = "block";
-            warning.textContent = `WARNING: Tab switching detected! This is warning #${warningCount}. Your activity is being recorded.`;
-
-            // Record the incident (you could send to server)
-            console.log(
-              "Tab switching detected at " + new Date().toISOString()
-            );
-
-            // Hide warning after 5 seconds
-            setTimeout(function () {
-              warning.style.display = "none";
-            }, 5000);
-          }
-          hiddenTime = 0;
-        }
-      });
-    </script>
     {% block scripts %}{% endblock %}
   </body>
 </html>
