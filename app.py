@@ -1142,5 +1142,24 @@ def export_results():
 def uploaded_file(filename):
     return redirect(url_for('static', filename=f'uploads/{filename}'))
 
+@app.route('/admin/delete_user/<int:user_id>', methods=['POST'])
+def delete_user(user_id):
+    if 'user_id' not in session or not session.get('is_admin'):
+        return jsonify({'error': 'Unauthorized'}), 401
+    if user_id == 1:
+        return jsonify({'error': 'Cannot delete admin user'}), 400
+    conn = sqlite3.connect('riddle_test.db')
+    c = conn.cursor()
+    try:
+        c.execute('DELETE FROM user_progress WHERE user_id = ?', (user_id,))
+        c.execute('DELETE FROM user_question_variants WHERE user_id = ?', (user_id,))
+        c.execute('DELETE FROM users WHERE id = ?', (user_id,))
+        conn.commit()
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    finally:
+        conn.close()
+
 if __name__ == '__main__':
     app.run(debug=True)
