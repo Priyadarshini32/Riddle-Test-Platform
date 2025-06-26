@@ -17,13 +17,16 @@
     <div class="card riddle-card" id="riddle-{{ riddle.id }}">
       <div class="card-header d-flex justify-content-between align-items-center">
         <h5 class="mb-0">Riddle #{{ loop.index }}</h5>
-        <span class="badge {{ 'bg-success' if riddle.completed else 'bg-primary' }}">
-          {% if riddle.completed %}
+        {% if riddle.completed %}
+        <div class="score-badge bg-success text-white border-success">
             Completed
-          {% else %}
-            Score: <span class="riddle-score">{{ riddle.score }}</span>/10
-          {% endif %}
-        </span>
+        </div>
+        {% else %}
+        <div class="score-badge">
+            <span class="riddle-score">{{ riddle.score }}</span>
+            <span>Points</span>
+        </div>
+        {% endif %}
       </div>
 
       <div class="card-body">
@@ -31,7 +34,7 @@
 
         <!-- Hints Section -->
         <div class="hints-container mb-3" {% if riddle.completed %}style="display: none;"{% endif %}>
-          <div class="d-flex mb-2">
+          <div class="d-flex gap-2 mb-2">
             {% for i in [1, 2, 3] %}
               <button class="btn btn-outline-warning btn-sm hint-btn"
                       data-riddle-id="{{ riddle.id }}"
@@ -316,6 +319,7 @@
 
   .hint-btn {
     margin: 5px;
+    gap: 100px;
   }
   .answer-input {
     width: 80%;

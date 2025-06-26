@@ -10,11 +10,15 @@
 <div class="row">
   <div class="col-12">
     <div class="card shadow-lg mb-4">
-      <div class="card-header bg-primary text-white">
+      <div class="card-header bg-primary-colour text-white">
         <h3 class="card-title mb-0">Your Results</h3>
       </div>
       <div class="card-body text-center">
-        <h4>Total Score: {{ total_score }} / {{ max_possible }}</h4>
+        <div class="total-score-container">
+          <div class="score-label">Total Score</div>
+          <div class="score-value">{{ total_score }}</div>
+          <div class="score-max h4 text-muted">out of {{ max_possible }}</div>
+        </div>
         <div class="text-center mt-4">
           <a href="{{ url_for('index') }}" class="btn btn-primary">
             <i class="fas fa-home me-2"></i>Return to Home

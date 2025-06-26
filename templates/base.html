@@ -8,37 +8,131 @@
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Varela+Round&display=swap"
+      rel="stylesheet"
+    />
     <style>
+      :root {
+        --primary-color: #384151;
+        --primary-darker: #242a34;
+        --secondary-color: #f0f8ff;
+        --dark-color: #343a40;
+        --light-color: #f8f9fa;
+        --success-color: #28a745;
+        --danger-color: #dc3545;
+        --warning-color: #ffc107;
+      }
+
       body {
-        font-family: "Arial", sans-serif;
-        background-color: #f5f5f5;
+        font-family: 'Varela Round', sans-serif;
+        background-color: var(--secondary-color);
+        color: #333;
+        transition: background-color 0.3s;
         padding-bottom: 50px;
       }
+
       .navbar {
-        background-color: #343a40;
+        background: linear-gradient(
+          90deg,
+          var(--primary-color) 0%,
+          var(--primary-darker) 100%
+        );
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        border-bottom: 2px solid rgba(255, 255, 255, 0.1);
         margin-bottom: 30px;
       }
+
+      .navbar-brand {
+        font-weight: 700;
+        font-size: 1.5rem;
+      }
+
+      .nav-link {
+        font-weight: bolder;
+        color: hsl(0, 0%, 100%);
+      }
+
       .card {
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s, box-shadow 0.3s;
+        overflow: hidden;
         margin-bottom: 20px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
       }
-      .hint-btn {
-        margin-right: 10px;
+
+      .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
       }
-      .riddle-card .card-body {
-        min-height: 200px;
+
+      .card-header {
+        background-color: var(--primary-color);
+        color: white;
+        border-top-left-radius: 15px;
+        border-top-right-radius: 15px;
+        font-weight: 600;
       }
+
+      .btn {
+        border-radius: 25px;
+        padding: 10px 20px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+      }
+
+      .btn-primary {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+      }
+      .btn-primary:hover {
+        background-color: var(--primary-darker);
+        border-color: var(--primary-darker);
+        transform: translateY(-2px);
+      }
+      .btn-outline-primary {
+        border-color: var(--primary-color);
+        color: var(--primary-color);
+        font-weight: 700;
+        line-height: 1;
+      }
+      .btn-outline-primary:hover {
+        background-color: var(--primary-color);
+        color: white;
+      }
+      .btn-outline-warning {
+        border-color: var(--warning-color);
+        color: var(--warning-color);
+      }
+      .btn-outline-warning:hover {
+        background-color: var(--warning-color);
+        color: white;
+      }
+      .btn-danger:hover {
+        transform: translateY(-2px);
+      }
+
       .hint-box {
-        background-color: #f8f9fa;
-        border-left: 4px solid #ffc107;
-        padding: 10px 15px;
-        margin: 10px 0;
+        background-color: #fff9e6;
+        border-left: 4px solid var(--warning-color);
+        padding: 15px;
+        margin: 15px 0;
+        border-radius: 5px;
       }
-      .results-table th,
-      .results-table td {
-        vertical-align: middle;
+
+      .results-table th {
+        background-color: var(--dark-color);
+        color: white;
       }
+
       .tab-change-warning {
         display: none;
         position: fixed;
@@ -47,11 +141,99 @@
         width: 100%;
         background-color: rgba(220, 53, 69, 0.95);
         color: white;
-        padding: 20px;
+        padding: 15px;
         text-align: center;
         z-index: 9999;
-        font-size: 18px;
-        font-weight: bold;
+        font-size: 1rem;
+        font-weight: 600;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      }
+
+      /* Score display styles */
+      .score-badge {
+        font-weight: 600;
+        color: var(--primary-color);
+        background-color: #fff;
+        border-radius: 10px;
+        padding: 0.5rem 1rem;
+        border: 2px solid var(--primary-color);
+        text-align: center;
+      }
+      .score-badge .riddle-score {
+        font-size: 2rem;
+        font-weight: 700;
+        display: block;
+        line-height: 1;
+      }
+      .score-badge.bg-success {
+        font-size: 1rem;
+        padding: 1.2rem 1rem;
+      }
+
+      .total-score-container {
+        background: white;
+        padding: 2rem;
+        border-radius: 15px;
+      }
+      .total-score-container .score-label {
+        font-size: 1.5rem;
+        font-weight: 400;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: #6c757d;
+      }
+      .total-score-container .score-value {
+        font-size: 6rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        line-height: 1;
+      }
+      .total-score-container .score-max {
+        font-weight: 400;
+      }
+
+      .admin-dashboard-bg {
+        background: linear-gradient(135deg, #f0f8ff 0%, #e6f2ff 100%);
+        min-height: 90vh;
+        padding-top: 40px;
+        padding-bottom: 40px;
+      }
+      .admin-dashboard-card {
+        background: #fff;
+        border-radius: 18px;
+        box-shadow: 0 8px 32px rgba(44, 62, 80, 0.10);
+        padding: 2.5rem 2rem 2rem 2rem;
+        margin-bottom: 40px;
+      }
+      .admin-dashboard-title {
+        font-size: 2.2rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        margin-bottom: 1.5rem;
+        letter-spacing: 1px;
+      }
+      .nav-tabs {
+        border-bottom: 2.5px solid var(--primary-color);
+        font-size: 1.15rem;
+        font-weight: 600;
+      }
+      .nav-tabs .nav-link {
+        color: var(--primary-color);
+        border: none;
+        border-bottom: 3px solid transparent;
+        background: none;
+        margin-right: 8px;
+        transition: color 0.2s, border-bottom 0.2s;
+      }
+      .nav-tabs .nav-link.active {
+        color: #fff;
+        background: var(--primary-color);
+        border-radius: 10px 10px 0 0;
+        border-bottom: 3px solid var(--primary-color);
+        box-shadow: 0 2px 8px rgba(44, 62, 80, 0.08);
+      }
+      .nav-tabs .nav-link:hover {
+        color: #16a085;
       }
     </style>
   </head>
@@ -75,9 +257,7 @@
           <ul class="navbar-nav ms-auto">
             {% if session.get('user_id') %} {% if session.get('is_admin') %}
             <li class="nav-item">
-              <a class="nav-link" href="{{ url_for('admin_dashboard') }}"
-                >Admin Dashboard</a
-              >
+              <span class="nav-link fw-bold" style="cursor: default;">Admin Dashboard</span>
             </li>
             {% else %}
             <li class="nav-item">
@@ -120,6 +300,22 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      // Enable navbar dropdown on hover for admin
+      document.addEventListener('DOMContentLoaded', function () {
+        var dropdown = document.querySelector('.nav-item.dropdown');
+        if (dropdown) {
+          dropdown.addEventListener('mouseenter', function () {
+            var menu = dropdown.querySelector('.dropdown-menu');
+            if (menu) menu.classList.add('show');
+          });
+          dropdown.addEventListener('mouseleave', function () {
+            var menu = dropdown.querySelector('.dropdown-menu');
+            if (menu) menu.classList.remove('show');
+          });
+        }
+      });
+    </script>
     {% block scripts %}{% endblock %}
   </body>
 </html>

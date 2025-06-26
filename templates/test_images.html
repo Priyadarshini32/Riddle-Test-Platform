@@ -28,12 +28,16 @@
         class="card-header d-flex justify-content-between align-items-center"
       >
         <h5 class="mb-0">Riddle #{{ loop.index }}</h5>
-        <span
-          class="badge {% if riddle.completed %}bg-success{% else %}bg-primary{% endif %}"
-        >
-          {% if riddle.completed %}Completed{% else %}Score:
-          <span class="riddle-score">{{ riddle.score }}</span>/10{% endif %}
-        </span>
+        {% if riddle.completed %}
+        <div class="score-badge bg-success text-white border-success">
+            Completed
+        </div>
+        {% else %}
+        <div class="score-badge">
+            <span class="riddle-score">{{ riddle.score }}</span>
+            <span>Points</span>
+        </div>
+        {% endif %}
       </div>
       <div class="card-body">
         <p class="riddle-question">
@@ -56,7 +60,7 @@
           endif
           %}
         >
-          <div class="d-flex mb-2">
+          <div class="d-flex gap-2 mb-2">
             <button
               class="btn btn-outline-warning btn-sm hint-btn"
               data-riddle-id="{{ riddle.id }}"

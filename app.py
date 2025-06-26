@@ -15,90 +15,13 @@ app.secret_key = secrets.token_hex(16)
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
-def modify_riddles_table():
-    conn = sqlite3.connect('riddle_test.db')
-    c = conn.cursor()
-    
-    # Create a new table for riddle variants
-    c.execute('''
-        CREATE TABLE IF NOT EXISTS riddle_variants (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            riddle_id INTEGER NOT NULL,
-            question_variant TEXT NOT NULL,
-            FOREIGN KEY (riddle_id) REFERENCES riddles (id)
-        )
-    ''')
-    
-    conn.commit()
-    conn.close()
-    print("Added riddle_variants table for multiple question variants")
-
-# Run this once to add the new table
-modify_riddles_table()
-
-def add_user_question_variants_table():
-    conn = sqlite3.connect('riddle_test.db')
-    c = conn.cursor()
-    
-    # Create a table to track which variant is assigned to each user
-    c.execute('''
-        CREATE TABLE IF NOT EXISTS user_question_variants (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER NOT NULL,
-    riddle_id INTEGER NOT NULL,
-    question_variant TEXT NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES users(id),
-    FOREIGN KEY (riddle_id) REFERENCES riddles(id)
-);
-    ''')
-    
-    conn.commit()
-    conn.close()
-    print("Added user_question_variants table to track user's assigned questions")
-
-# Run this once to set up the variant tracking
-add_user_question_variants_table()
-
 def init_db():
     conn = sqlite3.connect('riddle_test.db')
     c = conn.cursor()
-    
-    # Check if the column exists, if not add it
-    c.execute("PRAGMA table_info(users)")
-    columns = [column[1] for column in c.fetchall()]
-    
-    if "test_completed" not in columns:
-        c.execute("ALTER TABLE users ADD COLUMN test_completed INTEGER DEFAULT 0;")
-        conn.commit()
-        print("Added 'test_completed' column to users table.")
-    
-    conn.close()
-    return "Database updated with test_completed column"
 
-def add_image_column():
-    conn = sqlite3.connect('riddle_test.db')
-    c = conn.cursor()
+    # Enable foreign key support
+    c.execute("PRAGMA foreign_keys = ON;")
 
-    # Check if the "image" column already exists
-    c.execute("PRAGMA table_info(riddles);")
-    columns = [column[1] for column in c.fetchall()]
-    
-    if "image" not in columns:
-        c.execute("ALTER TABLE riddles ADD COLUMN image TEXT;")  # Add missing column
-        conn.commit()
-        print("Added 'image' column to riddles table.")
-
-    conn.close()
-
-# Run this once to update the database schema
-add_image_column()
-init_db()
-
-# Database initialization
-def init_db():
-    conn = sqlite3.connect('riddle_test.db')
-    c = conn.cursor()
-    
     # Users table
     c.execute('''
         CREATE TABLE IF NOT EXISTS users (
@@ -106,25 +29,13 @@ def init_db():
             username TEXT NOT NULL UNIQUE,
             email TEXT NOT NULL,
             password TEXT NOT NULL,
-            is_admin INTEGER DEFAULT 0
+            is_admin INTEGER DEFAULT 0,
+            test_completed INTEGER DEFAULT 0
         )
     ''')
-    
+
     # Riddles table
-    # c.execute('''
-    #     CREATE TABLE IF NOT EXISTS riddles (
-    #         id INTEGER PRIMARY KEY AUTOINCREMENT,
-    #         question TEXT NOT NULL,
-    #         answer TEXT NOT NULL,
-    #         hint1 TEXT NOT NULL,
-    #         hint2 TEXT NOT NULL,
-    #         hint3 TEXT NOT NULL
-    #     )
-    # ''')
-
-
-    # Modify riddles table to include an image field
-    c.execute(''' 
+    c.execute('''
         CREATE TABLE IF NOT EXISTS riddles (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             question TEXT NOT NULL,
@@ -132,11 +43,32 @@ def init_db():
             hint1 TEXT NOT NULL,
             hint2 TEXT NOT NULL,
             hint3 TEXT NOT NULL,
-            image TEXT  -- New column for storing image filenames
+            image TEXT
+        )
+    ''')
+    
+    # Riddle variants table
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS riddle_variants (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            riddle_id INTEGER NOT NULL,
+            question_variant TEXT NOT NULL,
+            FOREIGN KEY (riddle_id) REFERENCES riddles (id) ON DELETE CASCADE
+        )
+    ''')
+    
+    # User question variants table
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS user_question_variants (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            riddle_id INTEGER NOT NULL,
+            question_variant TEXT NOT NULL,
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+            FOREIGN KEY (riddle_id) REFERENCES riddles(id) ON DELETE CASCADE
         )
     ''')
 
-    
     # User progress table
     c.execute('''
         CREATE TABLE IF NOT EXISTS user_progress (
@@ -150,73 +82,49 @@ def init_db():
             hint3_used INTEGER DEFAULT 0,
             answer_attempt TEXT,
             completion_time TIMESTAMP,
-            FOREIGN KEY (user_id) REFERENCES users (id),
-            FOREIGN KEY (riddle_id) REFERENCES riddles (id),
+            FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
+            FOREIGN KEY (riddle_id) REFERENCES riddles (id) ON DELETE CASCADE,
             UNIQUE(user_id, riddle_id)
         )
     ''')
     
+    # Add columns if they don't exist (for older dbs, though deletion is recommended)
+    c.execute("PRAGMA table_info(users)")
+    columns = {column[1] for column in c.fetchall()}
+    if "test_completed" not in columns:
+        c.execute("ALTER TABLE users ADD COLUMN test_completed INTEGER DEFAULT 0;")
+
+    c.execute("PRAGMA table_info(riddles);")
+    columns = {column[1] for column in c.fetchall()}
+    if "image" not in columns:
+        c.execute("ALTER TABLE riddles ADD COLUMN image TEXT;")
+
     # Check if admin user exists
     c.execute("SELECT * FROM users WHERE username = 'admin'")
-    admin_user = c.fetchone()
-
-    if admin_user:
-        # Update password if the admin user exists
+    if c.fetchone():
         c.execute("UPDATE users SET password = ? WHERE username = 'admin'", ('adtechevent',))
     else:
-        # Insert new admin user if not exists
         c.execute("INSERT INTO users (username, email, password, is_admin) VALUES (?, ?, ?, ?)",
-                ('admin', 'admin@example.com', 'adtechevent', 1))
+                  ('admin', 'admin@example.com', 'adtechevent', 1))
 
-    conn.commit()  # Ensure changes are saved
+    conn.commit()
     
-    # Insert sample riddles if none exist
+    # Insert sample riddles if table is empty
     c.execute("SELECT COUNT(*) FROM riddles")
     if c.fetchone()[0] == 0:
         sample_riddles = [
-            (
-                "I speak without a mouth and hear without ears. I have no body, but I come alive with wind. What am I?",
-                "echo",
-                "I repeat what I hear.",
-                "You might find me in mountains and canyons.",
-                "I am a returning sound."
-            ),
-            (
-                "The more you take, the more you leave behind. What am I?",
-                "footsteps",
-                "I'm related to walking.",
-                "I'm marks left behind.",
-                "You make these when you walk on sand or snow."
-            ),
-            (
-                "What has keys but no locks, space but no room, and you can enter but not go in?",
-                "keyboard",
-                "I'm used for typing.",
-                "I have many buttons.",
-                "You use me with a computer."
-            ),
-            (
-                "What is always in front of you but can't be seen?",
-                "future",
-                "It's related to time.",
-                "It hasn't happened yet.",
-                "It's what's coming next in your life."
-            ),
-            (
-                "I have cities, but no houses. I have mountains, but no trees. I have water, but no fish. What am I?",
-                "map",
-                "I represent real places.",
-                "I'm used for navigation.",
-                "I show you where things are located."
-            )
+            ("I speak without a mouth and hear without ears. I have no body, but I come alive with wind. What am I?", "echo", "I repeat what I hear.", "You might find me in mountains and canyons.", "I am a returning sound.", None),
+            ("The more you take, the more you leave behind. What am I?", "footsteps", "I'm related to walking.", "I'm marks left behind.", "You make these when you walk on sand or snow.", None),
+            ("What has keys but no locks, space but no room, and you can enter but not go in?", "keyboard", "I'm used for typing.", "I have many buttons.", "You use me with a computer.", None),
+            ("What is always in front of you but can't be seen?", "future", "It's related to time.", "It hasn't happened yet.", "It's what's coming next in your life.", None)
         ]
-        
-        c.executemany("INSERT INTO riddles (question, answer, hint1, hint2, hint3) VALUES (?, ?, ?, ?, ?)", sample_riddles)
-    
-    conn.commit()
-    conn.close()
+        c.executemany("INSERT INTO riddles (question, answer, hint1, hint2, hint3, image) VALUES (?, ?, ?, ?, ?, ?)", sample_riddles)
+        conn.commit()
 
-# Initialize database
+    conn.close()
+    print("Database initialized successfully.")
+
+# Initialize the database
 init_db()
 
 # Routes
@@ -977,16 +885,12 @@ def delete_riddle(riddle_id):
     c = conn.cursor()
     
     try:
-        # Delete user progress for this riddle
-        c.execute("DELETE FROM user_progress WHERE riddle_id = ?", (riddle_id,))
-        
-        # Delete the riddle
+        c.execute("PRAGMA foreign_keys = ON;")
         c.execute("DELETE FROM riddles WHERE id = ?", (riddle_id,))
-        
         conn.commit()
-        
         return jsonify({'success': True})
     except Exception as e:
+        conn.rollback()
         return jsonify({'error': str(e)}), 500
     finally:
         conn.close()
@@ -1148,14 +1052,95 @@ def delete_user(user_id):
         return jsonify({'error': 'Unauthorized'}), 401
     if user_id == 1:
         return jsonify({'error': 'Cannot delete admin user'}), 400
+    
+    conn = sqlite3.connect('riddle_test.db')
+    c = conn.cursor()
+    
+    try:
+        # Manually delete all related data first to avoid foreign key errors
+        c.execute("DELETE FROM user_progress WHERE user_id = ?", (user_id,))
+        c.execute("DELETE FROM user_question_variants WHERE user_id = ?", (user_id,))
+        
+        # Now, delete the user
+        c.execute('DELETE FROM users WHERE id = ?', (user_id,))
+        
+        conn.commit()
+        return jsonify({'success': True})
+    except Exception as e:
+        conn.rollback()
+        return jsonify({'error': str(e)}), 500
+    finally:
+        conn.close()
+
+@app.route('/admin/reset_user_progress/<int:user_id>', methods=['POST'])
+def reset_user_progress(user_id):
+    if 'user_id' not in session or not session.get('is_admin'):
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    conn = sqlite3.connect('riddle_test.db')
+    c = conn.cursor()
+    
+    try:
+        # Clear old progress
+        c.execute("DELETE FROM user_progress WHERE user_id = ?", (user_id,))
+        c.execute("DELETE FROM user_question_variants WHERE user_id = ?", (user_id,))
+        
+        # Reset user's test completion status
+        c.execute("UPDATE users SET test_completed = 0 WHERE id = ?", (user_id,))
+        
+        # Re-initialize progress for all riddles
+        c.execute("SELECT id FROM riddles")
+        riddle_ids = c.fetchall()
+        for riddle_id in riddle_ids:
+            c.execute("INSERT INTO user_progress (user_id, riddle_id) VALUES (?, ?)", (user_id, riddle_id[0]))
+
+        conn.commit()
+        return jsonify({'success': True})
+    except Exception as e:
+        conn.rollback()
+        return jsonify({'error': str(e)}), 500
+    finally:
+        conn.close()
+
+@app.route('/admin/delete_riddle_variant/<int:variant_id>', methods=['POST'])
+def delete_riddle_variant(variant_id):
+    if 'user_id' not in session or not session.get('is_admin'):
+        return jsonify({'error': 'Unauthorized'}), 401
     conn = sqlite3.connect('riddle_test.db')
     c = conn.cursor()
     try:
-        c.execute('DELETE FROM user_progress WHERE user_id = ?', (user_id,))
-        c.execute('DELETE FROM user_question_variants WHERE user_id = ?', (user_id,))
-        c.execute('DELETE FROM users WHERE id = ?', (user_id,))
+        c.execute('DELETE FROM riddle_variants WHERE id = ?', (variant_id,))
         conn.commit()
         return jsonify({'success': True})
+    except Exception as e:
+        conn.rollback()
+        return jsonify({'error': str(e)}), 500
+    finally:
+        conn.close()
+
+@app.route('/admin/get_riddle_details/<int:riddle_id>', methods=['GET'])
+def get_riddle_details(riddle_id):
+    if 'user_id' not in session or not session.get('is_admin'):
+        return jsonify({'error': 'Unauthorized'}), 401
+    conn = sqlite3.connect('riddle_test.db')
+    conn.row_factory = sqlite3.Row
+    c = conn.cursor()
+    try:
+        c.execute('SELECT * FROM riddles WHERE id = ?', (riddle_id,))
+        riddle = c.fetchone()
+        if not riddle:
+            return jsonify({'error': 'Riddle not found'}), 404
+        c.execute('SELECT question_variant FROM riddle_variants WHERE riddle_id = ?', (riddle_id,))
+        variants = [row['question_variant'] for row in c.fetchall()]
+        return jsonify({
+            'question': riddle['question'],
+            'variants': variants,
+            'answer': riddle['answer'],
+            'hint1': riddle['hint1'],
+            'hint2': riddle['hint2'],
+            'hint3': riddle['hint3'],
+            'image': riddle['image']
+        })
     except Exception as e:
         return jsonify({'error': str(e)}), 500
     finally:
