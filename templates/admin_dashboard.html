@@ -1,8 +1,10 @@
 <!-- templates/admin_dashboard.html -->
 {% extends 'base.html' %} {% block content %}
+
 <div class="admin-dashboard-bg">
   <div class="admin-dashboard-card">
     <div class="admin-dashboard-title">Admin Dashboard</div>
+
     <ul class="nav nav-tabs mb-4" id="adminTabs" role="tablist">
       <li class="nav-item" role="presentation">
         <button
@@ -136,9 +138,24 @@
                     <td>{{ riddle.answer }}</td>
                     <td>
                       <div class="d-flex gap-2">
-                        <button class="btn btn-sm btn-info view-riddle-btn" data-riddle-id="{{ riddle.id }}">View</button>
-                        <button class="btn btn-sm btn-info view-variants-btn" data-riddle-id="{{ riddle.id }}">Variants</button>
-                        <button class="btn btn-sm btn-danger delete-riddle-btn" data-riddle-id="{{ riddle.id }}">Delete</button>
+                        <button
+                          class="btn btn-sm btn-info view-riddle-btn"
+                          data-riddle-id="{{ riddle.id }}"
+                        >
+                          View
+                        </button>
+                        <button
+                          class="btn btn-sm btn-info view-variants-btn"
+                          data-riddle-id="{{ riddle.id }}"
+                        >
+                          Variants
+                        </button>
+                        <button
+                          class="btn btn-sm btn-danger delete-riddle-btn"
+                          data-riddle-id="{{ riddle.id }}"
+                        >
+                          Delete
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -356,7 +373,12 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title">Riddle Details</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
       </div>
       <div class="modal-body">
         <h6>Primary Question:</h6>
@@ -374,7 +396,9 @@
         </ul>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          Close
+        </button>
       </div>
     </div>
   </div>
@@ -740,42 +764,51 @@
     });
 
     // View Riddle Details
-    document.querySelectorAll('.view-riddle-btn').forEach((button) => {
-      button.addEventListener('click', function () {
-        const riddleId = this.getAttribute('data-riddle-id');
+    document.querySelectorAll(".view-riddle-btn").forEach((button) => {
+      button.addEventListener("click", function () {
+        const riddleId = this.getAttribute("data-riddle-id");
         fetch(`/admin/get_riddle_details/${riddleId}`)
           .then((response) => response.json())
           .then((data) => {
-            document.getElementById('riddle-question-text').textContent = data.question;
-            document.getElementById('riddle-answer-text').textContent = data.answer;
-            document.getElementById('riddle-hint1').textContent = data.hint1;
-            document.getElementById('riddle-hint2').textContent = data.hint2;
-            document.getElementById('riddle-hint3').textContent = data.hint3;
+            document.getElementById("riddle-question-text").textContent =
+              data.question;
+            document.getElementById("riddle-answer-text").textContent =
+              data.answer;
+            document.getElementById("riddle-hint1").textContent = data.hint1;
+            document.getElementById("riddle-hint2").textContent = data.hint2;
+            document.getElementById("riddle-hint3").textContent = data.hint3;
             // Variants
-            const variantsList = document.getElementById('riddle-variants-list');
-            variantsList.innerHTML = '';
+            const variantsList = document.getElementById(
+              "riddle-variants-list"
+            );
+            variantsList.innerHTML = "";
             if (data.variants && data.variants.length > 0) {
               data.variants.forEach((variant) => {
-                const li = document.createElement('li');
+                const li = document.createElement("li");
                 li.textContent = variant;
                 variantsList.appendChild(li);
               });
             } else {
-              variantsList.innerHTML = '<li class="text-muted">No variants</li>';
+              variantsList.innerHTML =
+                '<li class="text-muted">No variants</li>';
             }
             // Image
-            const imageContainer = document.getElementById('riddle-image-container');
+            const imageContainer = document.getElementById(
+              "riddle-image-container"
+            );
             if (data.image) {
               imageContainer.innerHTML = `<img src='/static/uploads/${data.image}' class='img-fluid rounded mb-2' style='max-width:300px;' alt='Riddle Image'>`;
             } else {
-              imageContainer.innerHTML = '';
+              imageContainer.innerHTML = "";
             }
             // Show modal
-            const modal = new bootstrap.Modal(document.getElementById('viewRiddleModal'));
+            const modal = new bootstrap.Modal(
+              document.getElementById("viewRiddleModal")
+            );
             modal.show();
           })
           .catch((error) => {
-            alert('Error loading riddle details.');
+            alert("Error loading riddle details.");
           });
       });
     });

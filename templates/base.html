@@ -31,7 +31,7 @@
       }
 
       body {
-        font-family: 'Varela Round', sans-serif;
+        font-family: "Varela Round", sans-serif;
         background-color: var(--secondary-color);
         color: #333;
         transition: background-color 0.3s;
@@ -201,7 +201,7 @@
       .admin-dashboard-card {
         background: #fff;
         border-radius: 18px;
-        box-shadow: 0 8px 32px rgba(44, 62, 80, 0.10);
+        box-shadow: 0 8px 32px rgba(44, 62, 80, 0.1);
         padding: 2.5rem 2rem 2rem 2rem;
         margin-bottom: 40px;
       }
@@ -237,6 +237,859 @@
       }
     </style>
   </head>
+  <!-- templates/admin_dashboard.html -->
+  {% extends 'base.html' %} {% block content %}
+  <!-- Google tag (gtag.js) -->
+  <script
+    async
+    src="https://www.googletagmanager.com/gtag/js?id=G-C2T42NJ0MV"
+  ></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() {
+      dataLayer.push(arguments);
+    }
+    gtag("js", new Date());
+
+    gtag("config", "G-C2T42NJ0MV");
+  </script>
+  <div class="admin-dashboard-bg">
+    <div class="admin-dashboard-card">
+      <div class="admin-dashboard-title">Admin Dashboard</div>
+
+      <ul class="nav nav-tabs mb-4" id="adminTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+          <button
+            class="nav-link active"
+            id="users-tab"
+            data-bs-toggle="tab"
+            data-bs-target="#users"
+            type="button"
+            role="tab"
+          >
+            Users
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button
+            class="nav-link"
+            id="riddles-tab"
+            data-bs-toggle="tab"
+            data-bs-target="#riddles"
+            type="button"
+            role="tab"
+          >
+            Riddles
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button
+            class="nav-link"
+            id="export-tab"
+            data-bs-toggle="tab"
+            data-bs-target="#export"
+            type="button"
+            role="tab"
+          >
+            Export Data
+          </button>
+        </li>
+      </ul>
+      <div class="tab-content bg-primary-colour" id="adminTabContent">
+        <!-- Users Tab -->
+        <div
+          class="tab-pane fade show active"
+          id="users"
+          role="tabpanel"
+          aria-labelledby="users-tab"
+        >
+          <div class="card">
+            <div class="card-header bg-primary text-white">
+              <h4 class="mb-0">User Results</h4>
+            </div>
+            <div class="card-body">
+              <div class="table-responsive">
+                <table class="table table-striped table-bordered">
+                  <thead class="table-dark">
+                    <tr>
+                      <th>#</th>
+                      <th>Username</th>
+                      <th>Email</th>
+                      <th>Completed Riddles</th>
+                      <th>Total Score</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for user in users %}
+                    <tr>
+                      <td>{{ loop.index }}</td>
+                      <td>{{ user.username }}</td>
+                      <td>{{ user.email }}</td>
+                      <td>{{ user.completed_riddles }}</td>
+                      <td>{{ user.total_score }}</td>
+                      <td>
+                        <a
+                          href="{{ url_for('user_detail', user_id=user.id) }}"
+                          class="btn btn-sm btn-info me-1"
+                        >
+                          View Details
+                        </a>
+                        <button
+                          class="btn btn-sm btn-danger delete-user-btn"
+                          data-user-id="{{ user.id }}"
+                          title="Delete User"
+                        >
+                          <i class="bi bi-trash"></i>
+                        </button>
+                      </td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Riddles Tab -->
+        <div
+          class="tab-pane fade"
+          id="riddles"
+          role="tabpanel"
+          aria-labelledby="riddles-tab"
+        >
+          <div class="card">
+            <div
+              class="card-header bg-primary text-white d-flex justify-content-between align-items-center"
+            >
+              <h4 class="mb-0 bg-primary-color">Manage Riddles</h4>
+              <button
+                class="btn btn-sm btn-light"
+                data-bs-toggle="modal"
+                data-bs-target="#addRiddleModal"
+              >
+                Add New Riddle
+              </button>
+            </div>
+            <div class="card-body">
+              <div class="table-responsive">
+                <table class="table table-striped table-bordered">
+                  <thead class="table-dark">
+                    <tr>
+                      <th>#</th>
+                      <th>Question</th>
+                      <th>Answer</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for riddle in riddles %}
+                    <tr>
+                      <td>{{ loop.index }}</td>
+                      <td>{{ riddle.question }}</td>
+                      <td>{{ riddle.answer }}</td>
+                      <td>
+                        <div class="d-flex gap-2">
+                          <button
+                            class="btn btn-sm btn-info view-riddle-btn"
+                            data-riddle-id="{{ riddle.id }}"
+                          >
+                            View
+                          </button>
+                          <button
+                            class="btn btn-sm btn-info view-variants-btn"
+                            data-riddle-id="{{ riddle.id }}"
+                          >
+                            Variants
+                          </button>
+                          <button
+                            class="btn btn-sm btn-danger delete-riddle-btn"
+                            data-riddle-id="{{ riddle.id }}"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Export Tab -->
+        <div
+          class="tab-pane fade"
+          id="export"
+          role="tabpanel"
+          aria-labelledby="export-tab"
+        >
+          <div class="card">
+            <div class="card-header bg-primary text-white">
+              <h4 class="mb-0">Export Data</h4>
+            </div>
+            <div class="card-body">
+              <p>Export all user results and test data for analysis.</p>
+              <button id="exportJsonBtn" class="btn btn-success">
+                Export as JSON
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Riddle Modal -->
+  <div class="modal fade" id="addRiddleModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Add New Riddle</h5>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
+        </div>
+        <div class="modal-body">
+          <form id="addRiddleForm" enctype="multipart/form-data">
+            <div class="mb-3">
+              <label for="question" class="form-label">Primary Question</label>
+              <textarea
+                class="form-control"
+                id="question"
+                rows="2"
+                required
+              ></textarea>
+            </div>
+
+            <!-- Question Variants Section -->
+            <div class="mb-3">
+              <label class="form-label">Question Variants (Optional)</label>
+              <div id="variants-container">
+                <!-- Initial variant field -->
+                <div class="input-group mb-2 variant-group">
+                  <textarea
+                    class="form-control question-variant"
+                    rows="2"
+                    placeholder="Alternative question wording"
+                  ></textarea>
+                  <button
+                    type="button"
+                    class="btn btn-outline-danger remove-variant"
+                  >
+                    ×
+                  </button>
+                </div>
+              </div>
+              <button
+                type="button"
+                class="btn btn-outline-primary btn-sm"
+                id="add-variant-btn"
+              >
+                + Add Another Variant
+              </button>
+            </div>
+
+            <div class="mb-3">
+              <label for="answer" class="form-label">Answer</label>
+              <input type="text" class="form-control" id="answer" required />
+            </div>
+            <div class="mb-3">
+              <label for="hint1" class="form-label">Hint 1 (-2 points)</label>
+              <input type="text" class="form-control" id="hint1" required />
+            </div>
+            <div class="mb-3">
+              <label for="hint2" class="form-label">Hint 2 (-3 points)</label>
+              <input type="text" class="form-control" id="hint2" required />
+            </div>
+            <div class="mb-3">
+              <label for="hint3" class="form-label">Hint 3 (-4 points)</label>
+              <input type="text" class="form-control" id="hint3" required />
+            </div>
+            <div class="mb-3">
+              <label for="image" class="form-label"
+                >Upload Image (optional)</label
+              >
+              <input
+                type="file"
+                class="form-control"
+                id="image"
+                accept="image/*"
+              />
+            </div>
+          </form>
+        </div>
+
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            data-bs-dismiss="modal"
+          >
+            Cancel
+          </button>
+          <button type="button" class="btn btn-primary" id="saveRiddleBtn">
+            Add Riddle
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- View Variants Modal -->
+  <div
+    class="modal fade"
+    id="viewVariantsModal"
+    tabindex="-1"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Question Variants</h5>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
+        </div>
+        <div class="modal-body">
+          <h6>Primary Question:</h6>
+          <p id="primary-question-text" class="mb-3 p-2 bg-light"></p>
+
+          <h6>Variants:</h6>
+          <div id="variants-list">
+            <!-- Variants will be loaded here -->
+          </div>
+
+          <form id="addVariantForm" class="mt-3">
+            <input type="hidden" id="currentRiddleId" />
+            <div class="mb-3">
+              <label for="newVariant" class="form-label">Add New Variant</label>
+              <textarea
+                class="form-control"
+                id="newVariant"
+                rows="2"
+                required
+              ></textarea>
+            </div>
+            <button type="button" class="btn btn-primary" id="saveVariantBtn">
+              Add Variant
+            </button>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            data-bs-dismiss="modal"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confirm Delete Modal -->
+  <div
+    class="modal fade"
+    id="confirmDeleteModal"
+    tabindex="-1"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Confirm Deletion</h5>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
+        </div>
+        <div class="modal-body">
+          <p>
+            Are you sure you want to delete this riddle? This action cannot be
+            undone.
+          </p>
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            data-bs-dismiss="modal"
+          >
+            Cancel
+          </button>
+          <button type="button" class="btn btn-danger" id="confirmDeleteBtn">
+            Delete
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- View Riddle Details Modal -->
+  <div class="modal fade" id="viewRiddleModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Riddle Details</h5>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
+        </div>
+        <div class="modal-body">
+          <h6>Primary Question:</h6>
+          <p id="riddle-question-text" class="mb-3 p-2 bg-light"></p>
+          <div id="riddle-image-container" class="mb-3"></div>
+          <h6>Variants:</h6>
+          <ul id="riddle-variants-list"></ul>
+          <h6>Answer:</h6>
+          <p id="riddle-answer-text" class="mb-3"></p>
+          <h6>Hints:</h6>
+          <ul>
+            <li><strong>Hint 1:</strong> <span id="riddle-hint1"></span></li>
+            <li><strong>Hint 2:</strong> <span id="riddle-hint2"></span></li>
+            <li><strong>Hint 3:</strong> <span id="riddle-hint3"></span></li>
+          </ul>
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            data-bs-dismiss="modal"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endblock %} {% block scripts %}
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      // Handle tab switching from URL hash
+      const hash = window.location.hash;
+      if (hash) {
+        const tabTrigger = document.querySelector(
+          `.nav-tabs button[data-bs-target="${hash}"]`
+        );
+        if (tabTrigger) {
+          const tab = new bootstrap.Tab(tabTrigger);
+          tab.show();
+        }
+      }
+
+      // Update URL hash when a tab is shown
+      const tabElms = document.querySelectorAll('button[data-bs-toggle="tab"]');
+      tabElms.forEach(function (tabElm) {
+        tabElm.addEventListener("shown.bs.tab", function (event) {
+          // Use replaceState to avoid cluttering browser history
+          history.replaceState(null, null, event.target.dataset.bsTarget);
+        });
+      });
+
+      // Variants Management
+      const addVariantBtn = document.getElementById("add-variant-btn");
+      const variantsContainer = document.getElementById("variants-container");
+
+      // Add variant field
+      addVariantBtn.addEventListener("click", function () {
+        const variantGroup = document.createElement("div");
+        variantGroup.className = "input-group mb-2 variant-group";
+        variantGroup.innerHTML = `
+        <textarea class="form-control question-variant" rows="2" placeholder="Alternative question wording"></textarea>
+        <button type="button" class="btn btn-outline-danger remove-variant">×</button>
+      `;
+        variantsContainer.appendChild(variantGroup);
+
+        // Add remove event to the new button
+        variantGroup
+          .querySelector(".remove-variant")
+          .addEventListener("click", function () {
+            variantsContainer.removeChild(variantGroup);
+          });
+      });
+
+      // Remove variant field (initial one)
+      document.querySelectorAll(".remove-variant").forEach((button) => {
+        button.addEventListener("click", function () {
+          const group = this.closest(".variant-group");
+          variantsContainer.removeChild(group);
+        });
+      });
+
+      // Add Riddle
+      const saveRiddleBtn = document.getElementById("saveRiddleBtn");
+
+      saveRiddleBtn.addEventListener("click", function () {
+        const question = document.getElementById("question").value;
+        const answer = document.getElementById("answer").value;
+        const hint1 = document.getElementById("hint1").value;
+        const hint2 = document.getElementById("hint2").value;
+        const hint3 = document.getElementById("hint3").value;
+        const image = document.getElementById("image");
+
+        // Get all question variants
+        const variants = [];
+        document.querySelectorAll(".question-variant").forEach((variant) => {
+          if (variant.value.trim()) {
+            variants.push(variant.value.trim());
+          }
+        });
+
+        // Validate required fields
+        if (!question || !answer || !hint1 || !hint2 || !hint3) {
+          alert("All main fields are required");
+          return;
+        }
+
+        // Create FormData object to send files
+        let formData = new FormData();
+        formData.append("question", question);
+        formData.append("answer", answer);
+        formData.append("hint1", hint1);
+        formData.append("hint2", hint2);
+        formData.append("hint3", hint3);
+
+        // Add all variants to the form data
+        variants.forEach((variant) => {
+          formData.append("question_variants[]", variant);
+        });
+
+        if (image.files.length > 0) {
+          formData.append("image", image.files[0]); // Append image file
+        }
+
+        fetch("/admin/add_riddle", {
+          method: "POST",
+          body: formData, // Send FormData instead of JSON
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.success) {
+              alert("Riddle added successfully!");
+              location.reload();
+            } else {
+              alert("Error: " + data.error);
+            }
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+            alert("An error occurred while adding the riddle.");
+          });
+      });
+
+      // View Variants
+      const viewVariantsButtons =
+        document.querySelectorAll(".view-variants-btn");
+      viewVariantsButtons.forEach((button) => {
+        button.addEventListener("click", function () {
+          const riddleId = this.getAttribute("data-riddle-id");
+          document.getElementById("currentRiddleId").value = riddleId;
+
+          // Fetch variants for this riddle
+          fetch(`/admin/get_riddle_variants/${riddleId}`)
+            .then((response) => response.json())
+            .then((data) => {
+              document.getElementById("primary-question-text").textContent =
+                data.primary_question;
+
+              const variantsList = document.getElementById("variants-list");
+              variantsList.innerHTML = "";
+
+              if (data.variants.length === 0) {
+                variantsList.innerHTML =
+                  "<p class='text-muted'>No variants added yet</p>";
+              } else {
+                data.variants.forEach((variant) => {
+                  const variantItem = document.createElement("div");
+                  variantItem.className =
+                    "d-flex justify-content-between align-items-center mb-2 p-2 bg-light";
+                  variantItem.innerHTML = `
+                  <span>${variant.text}</span>
+                  <button class="btn btn-sm btn-outline-danger delete-variant-btn" 
+                          data-variant-id="${variant.id}">Delete</button>
+                `;
+                  variantsList.appendChild(variantItem);
+                });
+
+                // Add delete event listeners
+                document
+                  .querySelectorAll(".delete-variant-btn")
+                  .forEach((btn) => {
+                    btn.addEventListener("click", function () {
+                      const variantId = this.getAttribute("data-variant-id");
+                      deleteVariant(variantId);
+                    });
+                  });
+              }
+
+              // Show the modal
+              const modal = new bootstrap.Modal(
+                document.getElementById("viewVariantsModal")
+              );
+              modal.show();
+            })
+            .catch((error) => {
+              console.error("Error:", error);
+              alert("An error occurred while fetching variants.");
+            });
+        });
+      });
+
+      // Add new variant
+      const saveVariantBtn = document.getElementById("saveVariantBtn");
+      saveVariantBtn.addEventListener("click", function () {
+        const riddleId = document.getElementById("currentRiddleId").value;
+        const variantText = document.getElementById("newVariant").value.trim();
+
+        if (!variantText) {
+          alert("Please enter a variant question");
+          return;
+        }
+
+        fetch("/admin/add_riddle_variant", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            riddle_id: riddleId,
+            question_variant: variantText,
+          }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.success) {
+              // Clear the input
+              document.getElementById("newVariant").value = "";
+
+              // Refresh the variants list
+              const variantsList = document.getElementById("variants-list");
+              const variantItem = document.createElement("div");
+              variantItem.className =
+                "d-flex justify-content-between align-items-center mb-2 p-2 bg-light";
+              variantItem.innerHTML = `
+            <span>${variantText}</span>
+            <button class="btn btn-sm btn-outline-danger delete-variant-btn" 
+                    data-variant-id="${data.variant_id}">Delete</button>
+          `;
+              variantsList.appendChild(variantItem);
+
+              // Add delete event listener
+              variantItem
+                .querySelector(".delete-variant-btn")
+                .addEventListener("click", function () {
+                  const variantId = this.getAttribute("data-variant-id");
+                  deleteVariant(variantId);
+                });
+
+              // Remove the "no variants" message if it exists
+              const noVariantsMsg = variantsList.querySelector(".text-muted");
+              if (noVariantsMsg) {
+                variantsList.removeChild(noVariantsMsg);
+              }
+            } else {
+              alert("Error: " + data.error);
+            }
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+            alert("An error occurred while adding the variant.");
+          });
+      });
+
+      // Delete variant function
+      function deleteVariant(variantId) {
+        if (confirm("Are you sure you want to delete this variant?")) {
+          fetch(`/admin/delete_riddle_variant/${variantId}`, {
+            method: "POST",
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.success) {
+                // Remove the variant from the list
+                const variantItem = document
+                  .querySelector(
+                    `.delete-variant-btn[data-variant-id="${variantId}"]`
+                  )
+                  .closest("div");
+                variantItem.remove();
+
+                // Check if there are no more variants
+                if (
+                  document.getElementById("variants-list").children.length === 0
+                ) {
+                  document.getElementById("variants-list").innerHTML =
+                    "<p class='text-muted'>No variants added yet</p>";
+                }
+              } else {
+                alert("Error: " + data.error);
+              }
+            })
+            .catch((error) => {
+              console.error("Error:", error);
+              alert("An error occurred while deleting the variant.");
+            });
+        }
+      }
+
+      // Delete Riddle
+      let riddleToDelete = null;
+
+      const deleteButtons = document.querySelectorAll(".delete-riddle-btn");
+      deleteButtons.forEach((button) => {
+        button.addEventListener("click", function () {
+          riddleToDelete = this.getAttribute("data-riddle-id");
+          const modal = new bootstrap.Modal(
+            document.getElementById("confirmDeleteModal")
+          );
+          modal.show();
+        });
+      });
+
+      const confirmDeleteBtn = document.getElementById("confirmDeleteBtn");
+      confirmDeleteBtn.addEventListener("click", function () {
+        if (riddleToDelete) {
+          fetch(`/admin/delete_riddle/${riddleToDelete}`, {
+            method: "POST",
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.success) {
+                alert("Riddle deleted successfully!");
+                location.reload();
+              } else {
+                alert("Error: " + data.error);
+              }
+            })
+            .catch((error) => {
+              console.error("Error:", error);
+              alert("An error occurred while deleting the riddle.");
+            });
+        }
+      });
+
+      // Export Data
+      const exportJsonBtn = document.getElementById("exportJsonBtn");
+      exportJsonBtn.addEventListener("click", function () {
+        fetch("/admin/export_results")
+          .then((response) => response.json())
+          .then((data) => {
+            // Create file for download
+            const dataStr = JSON.stringify(data, null, 2);
+            const dataBlob = new Blob([dataStr], { type: "application/json" });
+            const dataUrl = URL.createObjectURL(dataBlob);
+
+            // Create download link
+            const downloadLink = document.createElement("a");
+            downloadLink.href = dataUrl;
+            downloadLink.download = "riddle_test_results.json";
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+            alert("An error occurred while exporting the data.");
+          });
+      });
+
+      // Delete User
+      const deleteUserButtons = document.querySelectorAll(".delete-user-btn");
+      deleteUserButtons.forEach((button) => {
+        button.addEventListener("click", function () {
+          const userId = this.getAttribute("data-user-id");
+          if (
+            confirm(
+              "Are you sure you want to delete this user and all their data? This action cannot be undone."
+            )
+          ) {
+            fetch(`/admin/delete_user/${userId}`, {
+              method: "POST",
+            })
+              .then((response) => response.json())
+              .then((data) => {
+                if (data.success) {
+                  alert("User deleted successfully!");
+                  location.reload();
+                } else {
+                  alert("Error: " + data.error);
+                }
+              })
+              .catch((error) => {
+                console.error("Error:", error);
+                alert("An error occurred while deleting the user.");
+              });
+          }
+        });
+      });
+
+      // View Riddle Details
+      document.querySelectorAll(".view-riddle-btn").forEach((button) => {
+        button.addEventListener("click", function () {
+          const riddleId = this.getAttribute("data-riddle-id");
+          fetch(`/admin/get_riddle_details/${riddleId}`)
+            .then((response) => response.json())
+            .then((data) => {
+              document.getElementById("riddle-question-text").textContent =
+                data.question;
+              document.getElementById("riddle-answer-text").textContent =
+                data.answer;
+              document.getElementById("riddle-hint1").textContent = data.hint1;
+              document.getElementById("riddle-hint2").textContent = data.hint2;
+              document.getElementById("riddle-hint3").textContent = data.hint3;
+              // Variants
+              const variantsList = document.getElementById(
+                "riddle-variants-list"
+              );
+              variantsList.innerHTML = "";
+              if (data.variants && data.variants.length > 0) {
+                data.variants.forEach((variant) => {
+                  const li = document.createElement("li");
+                  li.textContent = variant;
+                  variantsList.appendChild(li);
+                });
+              } else {
+                variantsList.innerHTML =
+                  '<li class="text-muted">No variants</li>';
+              }
+              // Image
+              const imageContainer = document.getElementById(
+                "riddle-image-container"
+              );
+              if (data.image) {
+                imageContainer.innerHTML = `<img src='/static/uploads/${data.image}' class='img-fluid rounded mb-2' style='max-width:300px;' alt='Riddle Image'>`;
+              } else {
+                imageContainer.innerHTML = "";
+              }
+              // Show modal
+              const modal = new bootstrap.Modal(
+                document.getElementById("viewRiddleModal")
+              );
+              modal.show();
+            })
+            .catch((error) => {
+              alert("Error loading riddle details.");
+            });
+        });
+      });
+    });
+  </script>
+  {% endblock %}
+
   <body>
     <div class="tab-change-warning" id="tabWarning">
       WARNING: Tab switching detected! This incident has been recorded.
@@ -257,7 +1110,9 @@
           <ul class="navbar-nav ms-auto">
             {% if session.get('user_id') %} {% if session.get('is_admin') %}
             <li class="nav-item">
-              <span class="nav-link fw-bold" style="cursor: default;">Admin Dashboard</span>
+              <span class="nav-link fw-bold" style="cursor: default"
+                >Admin Dashboard</span
+              >
             </li>
             {% else %}
             <li class="nav-item">
@@ -302,16 +1157,16 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script>
       // Enable navbar dropdown on hover for admin
-      document.addEventListener('DOMContentLoaded', function () {
-        var dropdown = document.querySelector('.nav-item.dropdown');
+      document.addEventListener("DOMContentLoaded", function () {
+        var dropdown = document.querySelector(".nav-item.dropdown");
         if (dropdown) {
-          dropdown.addEventListener('mouseenter', function () {
-            var menu = dropdown.querySelector('.dropdown-menu');
-            if (menu) menu.classList.add('show');
+          dropdown.addEventListener("mouseenter", function () {
+            var menu = dropdown.querySelector(".dropdown-menu");
+            if (menu) menu.classList.add("show");
           });
-          dropdown.addEventListener('mouseleave', function () {
-            var menu = dropdown.querySelector('.dropdown-menu');
-            if (menu) menu.classList.remove('show');
+          dropdown.addEventListener("mouseleave", function () {
+            var menu = dropdown.querySelector(".dropdown-menu");
+            if (menu) menu.classList.remove("show");
           });
         }
       });
