@@ -18,10 +18,10 @@ os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 def init_db():
     conn = sqlite3.connect('riddle_test.db')
     c = conn.cursor()
-
+    
     # Enable foreign key support
     c.execute("PRAGMA foreign_keys = ON;")
-
+    
     # Users table
     c.execute('''
         CREATE TABLE IF NOT EXISTS users (
@@ -33,9 +33,9 @@ def init_db():
             test_completed INTEGER DEFAULT 0
         )
     ''')
-
+    
     # Riddles table
-    c.execute('''
+    c.execute(''' 
         CREATE TABLE IF NOT EXISTS riddles (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             question TEXT NOT NULL,
@@ -46,7 +46,7 @@ def init_db():
             image TEXT
         )
     ''')
-    
+
     # Riddle variants table
     c.execute('''
         CREATE TABLE IF NOT EXISTS riddle_variants (
@@ -68,7 +68,7 @@ def init_db():
             FOREIGN KEY (riddle_id) REFERENCES riddles(id) ON DELETE CASCADE
         )
     ''')
-
+    
     # User progress table
     c.execute('''
         CREATE TABLE IF NOT EXISTS user_progress (
@@ -98,14 +98,14 @@ def init_db():
     columns = {column[1] for column in c.fetchall()}
     if "image" not in columns:
         c.execute("ALTER TABLE riddles ADD COLUMN image TEXT;")
-
+    
     # Check if admin user exists
     c.execute("SELECT * FROM users WHERE username = 'admin'")
     if c.fetchone():
         c.execute("UPDATE users SET password = ? WHERE username = 'admin'", ('adtechevent',))
     else:
         c.execute("INSERT INTO users (username, email, password, is_admin) VALUES (?, ?, ?, ?)",
-                  ('admin', 'admin@example.com', 'adtechevent', 1))
+                ('admin', 'admin@example.com', 'adtechevent', 1))
 
     conn.commit()
     
@@ -119,7 +119,7 @@ def init_db():
             ("What is always in front of you but can't be seen?", "future", "It's related to time.", "It hasn't happened yet.", "It's what's coming next in your life.", None)
         ]
         c.executemany("INSERT INTO riddles (question, answer, hint1, hint2, hint3, image) VALUES (?, ?, ?, ?, ?, ?)", sample_riddles)
-        conn.commit()
+    conn.commit()
 
     conn.close()
     print("Database initialized successfully.")
