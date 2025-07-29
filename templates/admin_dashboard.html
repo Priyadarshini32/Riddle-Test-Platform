@@ -404,6 +404,18 @@
 {% endblock %} {% block scripts %}
 <script>
   document.addEventListener("DOMContentLoaded", function () {
+    // Track admin dashboard page load
+    gtag('event', 'page_view', {
+      event_category: 'admin',
+      event_label: 'admin_dashboard_view'
+    });
+    
+    // Track admin login
+    gtag('event', 'admin_access', {
+      event_category: 'admin',
+      event_label: 'admin_dashboard_access'
+    });
+
     // Handle tab switching from URL hash
     const hash = window.location.hash;
     if (hash) {
@@ -420,6 +432,12 @@
     const tabElms = document.querySelectorAll('button[data-bs-toggle="tab"]');
     tabElms.forEach(function (tabElm) {
       tabElm.addEventListener("shown.bs.tab", function (event) {
+        // Track tab switching
+        gtag('event', 'tab_switch', {
+          event_category: 'admin',
+          event_label: event.target.dataset.bsTarget
+        });
+        
         // Use replaceState to avoid cluttering browser history
         history.replaceState(null, null, event.target.dataset.bsTarget);
       });

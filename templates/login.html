@@ -6,7 +6,7 @@
         <h3 class="card-title mb-0">Login</h3>
       </div>
       <div class="card-body">
-        <form method="post" action="{{ url_for('login') }}">
+        <form method="post" action="{{ url_for('login') }}" id="loginForm">
           <div class="mb-3">
             <label for="username" class="form-label">Username</label>
             <input
@@ -38,4 +38,32 @@
     </div>
   </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Track login form submission
+    const loginForm = document.getElementById('loginForm');
+    if (loginForm) {
+      loginForm.addEventListener('submit', function() {
+        gtag('event', 'login_attempt', {
+          event_category: 'authentication',
+          event_label: 'login_form_submit'
+        });
+      });
+    }
+    
+    // Track register link clicks
+    const registerLink = document.querySelector('a[href="{{ url_for("register") }}"]');
+    if (registerLink) {
+      registerLink.addEventListener('click', function() {
+        gtag('event', 'click', {
+          event_category: 'navigation',
+          event_label: 'register_link_click'
+        });
+      });
+    }
+  });
+</script>
 {% endblock %}

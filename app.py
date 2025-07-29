@@ -8,12 +8,23 @@ import json
 import secrets
 import random
 from werkzeug.utils import secure_filename
+import re
 
 
 app = Flask(__name__)
 app.secret_key = secrets.token_hex(16)
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+
+def normalize_answer(answer):
+    """
+    Normalize an answer by removing all spaces and converting to lowercase.
+    This makes answer matching more flexible.
+    """
+    if not answer:
+        return ""
+    # Remove all whitespace (spaces, tabs, newlines) and convert to lowercase
+    return re.sub(r'\s+', '', answer.lower())
 
 def init_db():
     conn = sqlite3.connect('riddle_test.db')
@@ -399,7 +410,8 @@ def submit_answer_without_images(riddle_id):
     if 'user_id' not in session:
         return jsonify({'error': 'Not logged in'}), 401
 
-    answer = request.json.get('answer', '').strip().lower()
+    answer = request.json.get('answer', '').strip()
+    normalized_answer = normalize_answer(answer)
 
     conn = sqlite3.connect('riddle_test.db')
     conn.row_factory = sqlite3.Row
@@ -420,8 +432,8 @@ def submit_answer_without_images(riddle_id):
         if riddle['completed']:  
             return jsonify({'error': 'Riddle already completed'}), 400
 
-        correct_answer = riddle['answer'].strip().lower()
-        is_correct = answer == correct_answer
+        correct_answer = normalize_answer(riddle['answer'])
+        is_correct = normalized_answer == correct_answer
 
         if is_correct:
             c.execute('''
@@ -539,7 +551,8 @@ def submit_answer_with_images(riddle_id):
     if 'user_id' not in session:
         return jsonify({'error': 'Not logged in'}), 401
 
-    answer = request.json.get('answer', '').strip().lower()
+    answer = request.json.get('answer', '').strip()
+    normalized_answer = normalize_answer(answer)
 
     conn = sqlite3.connect('riddle_test.db')
     c = conn.cursor()
@@ -553,10 +566,10 @@ def submit_answer_with_images(riddle_id):
 
     # Get correct answer
     c.execute("SELECT answer FROM riddles WHERE id = ?", (riddle_id,))
-    correct_answer = c.fetchone()[0].lower()
+    correct_answer = normalize_answer(c.fetchone()[0])
 
     # Check answer
-    is_correct = answer == correct_answer
+    is_correct = normalized_answer == correct_answer
 
     # Update user progress
     if is_correct:

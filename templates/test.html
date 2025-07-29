@@ -100,6 +100,18 @@
 {% block scripts %}
 <script>
   document.addEventListener("DOMContentLoaded", function () {
+    // Track test page load
+    gtag('event', 'page_view', {
+      event_category: 'test',
+      event_label: 'test_page_load',
+      custom_parameter: 'riddle_test'
+    });
+
+    // Track test start
+    gtag('event', 'test_start', {
+      event_category: 'test',
+      event_label: 'riddle_test_started'
+    });
 
         // Disable right-click
         document.addEventListener("contextmenu", function (e) {
@@ -142,9 +154,23 @@
     document.addEventListener("visibilitychange", function () {
       if (document.visibilityState === "hidden" && !isRedirecting) {
         tabSwitchCount++;
+        
+        // Track tab switch
+        gtag('event', 'tab_switch', {
+          event_category: 'test_security',
+          event_label: 'tab_switch_detected',
+          value: tabSwitchCount
+        });
   
         if (tabSwitchCount >= maxTabSwitches) {
           isRedirecting = true;
+          
+          // Track cheating attempt
+          gtag('event', 'cheating_attempt', {
+            event_category: 'test_security',
+            event_label: 'max_tab_switches_reached'
+          });
+          
           recordCheatingAttempt().then(() => {
             window.location.href = "{{ url_for('results') }}";
           });
@@ -186,7 +212,15 @@
       button.addEventListener("click", function () {
         const riddleId = this.getAttribute("data-riddle-id");
         const hintNum = this.getAttribute("data-hint-num");
-  
+        
+        // Track hint usage
+        gtag('event', 'hint_used', {
+          event_category: 'test',
+          event_label: `hint_${hintNum}_used`,
+          riddle_id: riddleId,
+          hint_number: hintNum
+        });
+
         fetch(`/get_hint_without_images/${riddleId}/${hintNum}`, {
           method: "POST",
           headers: {
@@ -244,7 +278,14 @@
           feedbackElement.textContent = "Please enter an answer.";
           return;
         }
-  
+        
+        // Track answer submission
+        gtag('event', 'answer_submitted', {
+          event_category: 'test',
+          event_label: 'answer_submission',
+          riddle_id: riddleId
+        });
+
         fetch(`/submit_answer_without_images/${riddleId}`, {
           method: "POST",
           headers: {
@@ -260,6 +301,14 @@
         })
         .then(data => {
           if (data.correct) {
+            // Track correct answer
+            gtag('event', 'correct_answer', {
+              event_category: 'test',
+              event_label: 'correct_answer_submitted',
+              riddle_id: riddleId,
+              score_earned: data.final_score
+            });
+            
             // Success handling
             const answerContainer = riddleCard.querySelector('.answer-container');
             const hintsContainer = riddleCard.querySelector('.hints-container');
@@ -286,6 +335,13 @@
               badge.textContent = 'Completed';
             }
           } else {
+            // Track incorrect answer
+            gtag('event', 'incorrect_answer', {
+              event_category: 'test',
+              event_label: 'incorrect_answer_submitted',
+              riddle_id: riddleId
+            });
+            
             feedbackElement.textContent = "Incorrect answer. Try again!";
             setTimeout(() => { feedbackElement.textContent = ''; }, 3000);
           }
@@ -306,6 +362,17 @@
         }
       });
     });
+    
+    // Track next button click
+    const nextButton = document.querySelector('a[href="{{ url_for("test_with_images") }}"]');
+    if (nextButton) {
+      nextButton.addEventListener('click', function() {
+        gtag('event', 'test_navigation', {
+          event_category: 'test',
+          event_label: 'next_section_click'
+        });
+      });
+    }
   });
   </script>
 {% endblock %} {% block styles %}

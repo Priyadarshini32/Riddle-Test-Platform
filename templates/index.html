@@ -34,16 +34,16 @@
 
         {% if not session.get('user_id') %}
         <div class="mt-4 d-flex justify-content-center">
-          <a href="{{ url_for('register') }}" class="btn btn-primary me-3"
+          <a href="{{ url_for('register') }}" class="btn btn-primary me-3" id="registerBtn"
             >Register</a
           >
-          <a href="{{ url_for('login') }}" class="btn btn-outline-primary"
+          <a href="{{ url_for('login') }}" class="btn btn-outline-primary" id="loginBtn"
             >Login</a
           >
         </div>
         {% else %}
         <div class="mt-4 d-flex justify-content-center">
-          <a href="{{ url_for('test') }}" class="btn btn-success"
+          <a href="{{ url_for('test') }}" class="btn btn-success" id="startTestBtn"
             >Start the Test</a
           >
         </div>
@@ -52,4 +52,47 @@
     </div>
   </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Track index page view
+    gtag('event', 'page_view', {
+      event_category: 'home',
+      event_label: 'index_page_view'
+    });
+    
+    // Track navigation button clicks
+    const registerBtn = document.getElementById('registerBtn');
+    if (registerBtn) {
+      registerBtn.addEventListener('click', function() {
+        gtag('event', 'click', {
+          event_category: 'navigation',
+          event_label: 'register_button_click'
+        });
+      });
+    }
+    
+    const loginBtn = document.getElementById('loginBtn');
+    if (loginBtn) {
+      loginBtn.addEventListener('click', function() {
+        gtag('event', 'click', {
+          event_category: 'navigation',
+          event_label: 'login_button_click'
+        });
+      });
+    }
+    
+    const startTestBtn = document.getElementById('startTestBtn');
+    if (startTestBtn) {
+      startTestBtn.addEventListener('click', function() {
+        gtag('event', 'click', {
+          event_category: 'navigation',
+          event_label: 'start_test_button_click'
+        });
+      });
+    }
+  });
+</script>
 {% endblock %}

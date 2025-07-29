@@ -7,7 +7,7 @@
         <h3 class="card-title mb-0">Register</h3>
       </div>
       <div class="card-body">
-        <form method="post" action="{{ url_for('register') }}">
+        <form method="post" action="{{ url_for('register') }}" id="registerForm">
           <div class="mb-3">
             <label for="username" class="form-label">Username</label>
             <input
@@ -40,7 +40,7 @@
           </div>
           <div class="d-flex justify-content-between">
             <button type="submit" class="btn btn-primary">Register</button>
-            <a href="{{ url_for('login') }}" class="btn btn-link"
+            <a href="{{ url_for('login') }}" class="btn btn-link" id="loginLink"
               >Already have an account? Login</a
             >
           </div>
@@ -49,4 +49,32 @@
     </div>
   </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Track register form submission
+    const registerForm = document.getElementById('registerForm');
+    if (registerForm) {
+      registerForm.addEventListener('submit', function() {
+        gtag('event', 'register_attempt', {
+          event_category: 'authentication',
+          event_label: 'register_form_submit'
+        });
+      });
+    }
+    
+    // Track login link clicks
+    const loginLink = document.getElementById('loginLink');
+    if (loginLink) {
+      loginLink.addEventListener('click', function() {
+        gtag('event', 'click', {
+          event_category: 'navigation',
+          event_label: 'login_link_click'
+        });
+      });
+    }
+  });
+</script>
 {% endblock %}

@@ -20,7 +20,7 @@
           <div class="score-max h4 text-muted">out of {{ max_possible }}</div>
         </div>
         <div class="text-center mt-4">
-          <a href="{{ url_for('index') }}" class="btn btn-primary">
+          <a href="{{ url_for('index') }}" class="btn btn-primary" id="homeButton">
             <i class="fas fa-home me-2"></i>Return to Home
           </a>
         </div>
@@ -28,4 +28,41 @@
     </div>
   </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Track results page view
+    gtag('event', 'page_view', {
+      event_category: 'results',
+      event_label: 'results_page_view'
+    });
+    
+    // Track test completion with score
+    gtag('event', 'test_completion', {
+      event_category: 'test',
+      event_label: 'test_completed'
+    });
+    
+    // Track if test was flagged for cheating
+    {% if any_flagged %}
+    gtag('event', 'test_flagged', {
+      event_category: 'test_security',
+      event_label: 'test_flagged_for_cheating'
+    });
+    {% endif %}
+    
+    // Track home button click
+    const homeButton = document.getElementById('homeButton');
+    if (homeButton) {
+      homeButton.addEventListener('click', function() {
+        gtag('event', 'navigation', {
+          event_category: 'results',
+          event_label: 'return_to_home_click'
+        });
+      });
+    }
+  });
+</script>
 {% endblock %}

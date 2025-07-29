@@ -202,6 +202,18 @@
 
 <script>
   document.addEventListener("DOMContentLoaded", function () {
+    // Track test images page load
+    gtag('event', 'page_view', {
+      event_category: 'test',
+      event_label: 'test_images_page_load'
+    });
+    
+    // Track test images section start
+    gtag('event', 'test_section_start', {
+      event_category: 'test',
+      event_label: 'test_images_section_started'
+    });
+
     // Disable right-click
     document.addEventListener("contextmenu", function (e) {
       e.preventDefault();
@@ -245,10 +257,23 @@
     document.addEventListener("visibilitychange", function () {
       if (document.visibilityState === "hidden" && !isRedirecting) {
         tabSwitchCount++;
+        
+        // Track tab switch
+        gtag('event', 'tab_switch', {
+          event_category: 'test_security',
+          event_label: 'tab_switch_detected_images',
+          value: tabSwitchCount
+        });
 
         if (tabSwitchCount >= maxTabSwitches) {
           // Redirect to results page after 3 warnings
           isRedirecting = true;
+          
+          // Track cheating attempt
+          gtag('event', 'cheating_attempt', {
+            event_category: 'test_security',
+            event_label: 'max_tab_switches_reached_images'
+          });
 
           // Record the attempt to cheat
           recordCheatingAttempt().then(() => {
@@ -323,6 +348,14 @@
       button.addEventListener("click", function () {
         const riddleId = this.getAttribute("data-riddle-id");
         const hintNum = this.getAttribute("data-hint-num");
+        
+        // Track hint usage
+        gtag('event', 'hint_used', {
+          event_category: 'test',
+          event_label: `hint_${hintNum}_used_images`,
+          riddle_id: riddleId,
+          hint_number: hintNum
+        });
 
         fetch(`/get_hint_with_images/${riddleId}/${hintNum}`, {
           method: "POST",
@@ -414,6 +447,13 @@
         if (!answer) {
           return;
         }
+        
+        // Track answer submission
+        gtag('event', 'answer_submitted', {
+          event_category: 'test',
+          event_label: 'answer_submission_images',
+          riddle_id: riddleId
+        });
 
         fetch(`/submit_answer_with_images/${riddleId}`, {
           method: "POST",
@@ -427,6 +467,14 @@
           .then((response) => response.json())
           .then((data) => {
             if (data.correct) {
+              // Track correct answer
+              gtag('event', 'correct_answer', {
+                event_category: 'test',
+                event_label: 'correct_answer_submitted_images',
+                riddle_id: riddleId,
+                score_earned: data.score
+              });
+              
               // Show success message
               const successMsg = document.querySelector(`#success-${riddleId}`);
               successMsg.style.display = "block";
@@ -457,6 +505,13 @@
               // Check if all riddles are now completed
               checkTestCompletion();
             } else {
+              // Track incorrect answer
+              gtag('event', 'incorrect_answer', {
+                event_category: 'test',
+                event_label: 'incorrect_answer_submitted_images',
+                riddle_id: riddleId
+              });
+              
               // Show feedback message
               const feedback = document.querySelector(`#feedback-${riddleId}`);
               feedback.textContent = "Incorrect answer. Try again!";
